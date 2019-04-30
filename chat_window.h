@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "ip_info.h"
 
+#define SIZE 1024
+
 namespace Ui {
 class Chat_Window;
 }
@@ -20,6 +22,11 @@ public:
 private:
     Ui::Chat_Window *ui;
     IP_info *IP;
+    char *buffer;
+    char *buff;
+
+    void socket_recv();
+    void clear_buf(char *buf);
 };
 
 #endif // CHAT_WINDOW_H

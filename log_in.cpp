@@ -184,14 +184,6 @@ bool Log_in::log_communicate(std::string construction)
     {
         if(strcmp(buffer,"OK")==0)
         {
-            QMessageBox msg;
-            msg.setWindowTitle("提示");
-            msg.setText("登录成功！");
-            msg.setStyleSheet("font: 8pt;");
-            msg.setIcon((QMessageBox::Information));
-            msg.addButton(tr("确定"),QMessageBox::ActionRole);
-            msg.exec();
-
             Chat_Window *chat_window=new Chat_Window();
             chat_window->setWindowTitle(" 电子垃圾聊天室");
             chat_window->IP_assign(IP);

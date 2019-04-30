@@ -134,6 +134,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="placeholderText">
+          <string>User's name</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -221,6 +224,9 @@
          </property>
          <property name="echoMode">
           <enum>QLineEdit::Password</enum>
+         </property>
+         <property name="placeholderText">
+          <string>User's password</string>
          </property>
         </widget>
        </item>
