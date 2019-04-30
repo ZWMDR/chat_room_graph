@@ -22,6 +22,7 @@ Log_in::Log_in(QWidget *parent) :
 {
     ui->setupUi(this);
     IP=new IP_info();
+    lst_input_count=0;
 }
 
 Log_in::~Log_in()

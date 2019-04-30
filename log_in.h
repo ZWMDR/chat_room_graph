@@ -32,6 +32,7 @@ private slots:
 private:
     Ui::Log_in *ui;
     IP_info *IP;
+    int lst_input_count;
     bool log_communicate(std::string);
 };
 

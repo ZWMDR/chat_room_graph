@@ -41,7 +41,7 @@
       <height>351</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="7,2,4,2,4,2,4,2,4">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="7,2,3,2,3,2,3,2,3">
      <item>
       <widget class="QLabel" name="label_3">
        <property name="font">
@@ -218,6 +218,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
          </property>
         </widget>
        </item>
