@@ -2,6 +2,12 @@
 #define LOG_IN_H
 
 #include <QMainWindow>
+#include <QTcpSocket>
+#include <string>
+#include <QMessageBox>
+#include <iostream>
+#include <QDebug>
+#include <string.h>
 #include "ip_info.h"
 
 namespace Ui {
@@ -26,6 +32,7 @@ private slots:
 private:
     Ui::Log_in *ui;
     IP_info *IP;
+    bool log_communicate(std::string);
 };
 
 #endif // LOG_IN_H

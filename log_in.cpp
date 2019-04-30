@@ -1,12 +1,6 @@
 #include "log_in.h"
 #include "ui_log_in.h"
 #include "chat_window.h"
-#include <QTcpSocket>
-#include <string>
-#include <QMessageBox>
-#include <iostream>
-#include <QDebug>
-#include <string.h>
 
 #define SIZE 1024
 
@@ -35,9 +29,8 @@ Log_in::~Log_in()
     delete ui;
 }
 
-void Log_in::on_Log_in_but_clicked()//登录按钮
+bool Log_in::log_communicate(std::string construction)
 {
-    std::string construction="log_in";
     QString name=this->ui->user_name->text();
     QString pswd=this->ui->user_pswd->text();
     IP->socket->connectToHost(IP->IP_addr.c_str(), IP->IP_port);
@@ -51,7 +44,9 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-        this->close();
+
+        IP->socket->close();
+        return false;
     }
 
     //发送登录信息
@@ -63,7 +58,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
-        return;
+        return false;
     }
     memset(buffer,0,SIZE);
     IP->recved=IP->socket->waitForReadyRead(2000);
@@ -71,7 +66,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
-        return;
+        return false;
     }
     IP->socket->read(buffer,SIZE);
 
@@ -83,6 +78,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
+        return false;
     }
     memset(buffer,0,SIZE);
     IP->recved=IP->socket->waitForReadyRead(2000);
@@ -90,7 +86,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
-        return;
+        return false;
     }
     IP->socket->read(buffer,SIZE);
 
@@ -104,7 +100,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
-        return;
+        return false;
     }
 
     //接收登录信息
@@ -114,7 +110,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
-        return;
+        return false;
     }
     IP->socket->read(buffer,SIZE);
 
@@ -127,6 +123,9 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
+
+        IP->socket->close();
+        return false;
     }
     else if(strcmp(buffer,"error2")==0)
     {
@@ -137,6 +136,9 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
+
+        IP->socket->close();
+        return false;
     }
     else if(strcmp(buffer,"error3")==0)
     {
@@ -147,6 +149,9 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
+
+        IP->socket->close();
+        return false;
     }
     else if(strcmp(buffer,"error4")==0)
     {
@@ -157,6 +162,9 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
+
+        IP->socket->close();
+        return false;
     }
     else if(strcmp(buffer,"error5")==0)
     {
@@ -167,6 +175,9 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
+
+        IP->socket->close();
+        return false;
     }
     else
     {
@@ -211,8 +222,18 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
             msg.setIcon((QMessageBox::Information));
             msg.addButton(tr("确定"),QMessageBox::ActionRole);
             msg.exec();
+
+            IP->socket->close();
+            return false;
         }
     }
+    return true;
+}
+
+void Log_in::on_Log_in_but_clicked()//登录按钮
+{
+    std::string construction="log_in";
+    log_communicate(construction);
     IP->socket->close();
 }
 
@@ -223,5 +244,7 @@ void Log_in::on_cancel_but_clicked()//取消按钮
 
 void Log_in::on_sign_in_but_clicked()//注册按钮
 {
-
+    std::string construction="sign_in";
+    log_communicate(construction);
+    IP->socket->close();
 }
