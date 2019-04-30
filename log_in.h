@@ -20,6 +20,7 @@ class Log_in : public QMainWindow
 
 public:
     explicit Log_in(QWidget *parent = nullptr);
+    void IP_assign(IP_info *IP);
     ~Log_in();
 
 private slots:
@@ -34,6 +35,7 @@ private:
     IP_info *IP;
     int lst_input_count;
     bool log_communicate(std::string);
+    char *buffer;
 };
 
 #endif // LOG_IN_H

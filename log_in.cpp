@@ -21,8 +21,13 @@ Log_in::Log_in(QWidget *parent) :
     ui(new Ui::Log_in)
 {
     ui->setupUi(this);
-    IP=new IP_info();
     lst_input_count=0;
+    buffer=new char[SIZE];
+}
+
+void Log_in::IP_assign(IP_info *IP)
+{
+    this->IP=IP;
 }
 
 Log_in::~Log_in()
@@ -51,7 +56,7 @@ bool Log_in::log_communicate(std::string construction)
     }
 
     //发送登录信息
-    char buffer[SIZE];
+    memset(buffer,0,SIZE);
     strcpy(buffer,construction.c_str());
     IP->socket->write(buffer,SIZE);
     IP->sended=IP->socket->waitForBytesWritten(2000);
@@ -184,11 +189,7 @@ bool Log_in::log_communicate(std::string construction)
     {
         if(strcmp(buffer,"OK")==0)
         {
-            Chat_Window *chat_window=new Chat_Window();
-            chat_window->setWindowTitle(" 电子垃圾聊天室");
-            chat_window->IP_assign(IP);
-            chat_window->show();
-            this->close();
+            return true;
         }
         else if(strcmp(buffer,"OK1")==0)
         {
@@ -200,11 +201,7 @@ bool Log_in::log_communicate(std::string construction)
             msg.addButton(tr("确定"),QMessageBox::ActionRole);
             msg.exec();
 
-            Chat_Window *chat_window=new Chat_Window();
-            chat_window->setWindowTitle(" 电子垃圾聊天室");
-            chat_window->IP_assign(IP);
-            chat_window->show();
-            this->close();
+            return true;
         }
         else
         {
@@ -220,14 +217,31 @@ bool Log_in::log_communicate(std::string construction)
             return false;
         }
     }
-    return true;
 }
 
 void Log_in::on_Log_in_but_clicked()//登录按钮
 {
     std::string construction="log_in";
-    log_communicate(construction);
-    IP->socket->close();
+    if(!log_communicate(construction))
+    {
+        IP->socket->close();
+        return;
+    }
+    memset(buffer,0,SIZE);
+    strcpy(buffer,"OK");
+    IP->socket->write(buffer,SIZE);
+    IP->sended=IP->socket->waitForBytesWritten(2000);
+    if(!IP->sended)
+    {
+        network_error();
+        IP->socket->close();
+        return;
+    }
+    Chat_Window *chat_window=new Chat_Window();
+    chat_window->setWindowTitle(" 电子垃圾聊天室");
+    chat_window->IP_assign(IP);
+    chat_window->show();
+    this->close();
 }
 
 void Log_in::on_cancel_but_clicked()//取消按钮
@@ -238,6 +252,24 @@ void Log_in::on_cancel_but_clicked()//取消按钮
 void Log_in::on_sign_in_but_clicked()//注册按钮
 {
     std::string construction="sign_in";
-    log_communicate(construction);
-    IP->socket->close();
+    if(!log_communicate(construction))
+    {
+        IP->socket->close();
+        return;
+    }
+    memset(buffer,0,SIZE);
+    strcpy(buffer,"OK");
+    IP->socket->write(buffer,SIZE);
+    IP->sended=IP->socket->waitForBytesWritten(2000);
+    if(!IP->sended)
+    {
+        network_error();
+        IP->socket->close();
+        return;
+    }
+    Chat_Window *chat_window=new Chat_Window();
+    chat_window->setWindowTitle(" 电子垃圾聊天室");
+    chat_window->IP_assign(IP);
+    chat_window->show();
+    this->close();
 }

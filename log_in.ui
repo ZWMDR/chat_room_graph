@@ -103,7 +103,8 @@
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(0, 0, 255);</string>
+          <string notr="true">color: rgb(0, 0, 255);
+font: 14pt &quot;微软雅黑&quot;;</string>
          </property>
          <property name="text">
           <string>用户名</string>
@@ -191,7 +192,8 @@
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(0, 0, 255);</string>
+          <string notr="true">color: rgb(0, 0, 255);
+font: 14pt &quot;微软雅黑&quot;;</string>
          </property>
          <property name="text">
           <string>密码</string>
