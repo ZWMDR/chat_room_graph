@@ -7,6 +7,15 @@
 class IP_info
 {
 public:
+    IP_info(unsigned short port)
+    {
+        IP_addr="122.152.205.193";
+        IP_port=port;
+        connected=false;
+        sended=false;
+        recved=false;
+        socket=new QTcpSocket();
+    }
     IP_info()
     {
         IP_addr="122.152.205.193";

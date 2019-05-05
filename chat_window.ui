@@ -36,9 +36,9 @@
     <property name="geometry">
      <rect>
       <x>13</x>
-      <y>13</y>
+      <y>33</y>
       <width>781</width>
-      <height>451</height>
+      <height>431</height>
      </rect>
     </property>
     <property name="font">
@@ -103,6 +103,31 @@
     </property>
     <property name="text">
      <string>退出</string>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="mesg_output">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>0</y>
+      <width>261</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>幼圆</family>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 0, 0);</string>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+    <property name="tabStopWidth">
+     <number>80</number>
     </property>
    </widget>
   </widget>

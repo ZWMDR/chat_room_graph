@@ -228,7 +228,7 @@ font: 14pt &quot;微软雅黑&quot;;</string>
           <enum>QLineEdit::Password</enum>
          </property>
          <property name="placeholderText">
-          <string>User's password</string>
+          <string>User's password(5-18bits)</string>
          </property>
         </widget>
        </item>

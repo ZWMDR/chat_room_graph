@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "ip_info.h"
+#include "log_in.h"
 
 #define SIZE 1024
 

@@ -39,6 +39,19 @@ bool Log_in::log_communicate(std::string construction)
 {
     QString name=this->ui->user_name->text();
     QString pswd=this->ui->user_pswd->text();
+    if(pswd.length()<5 || pswd.length()>18)
+    {
+        QMessageBox msg;
+        msg.setWindowTitle("提示");
+        msg.setText("密码长度错误！请输入5-18位密码！");
+        msg.setStyleSheet("font: 8pt;");
+        msg.setIcon((QMessageBox::Information));
+        msg.addButton(tr("确定"),QMessageBox::ActionRole);
+        msg.exec();
+        return false;
+    }
+
+    //打开TCP连接
     IP->socket->connectToHost(IP->IP_addr.c_str(), IP->IP_port);
     IP->connected=IP->socket->waitForConnected(2000);
     if(!IP->connected)
@@ -50,8 +63,6 @@ bool Log_in::log_communicate(std::string construction)
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-
-        IP->socket->close();
         return false;
     }
 
@@ -63,7 +74,6 @@ bool Log_in::log_communicate(std::string construction)
     if(!IP->sended)
     {
         network_error();
-        IP->socket->close();
         return false;
     }
     memset(buffer,0,SIZE);
@@ -71,7 +81,6 @@ bool Log_in::log_communicate(std::string construction)
     if(!IP->recved)
     {
         network_error();
-        IP->socket->close();
         return false;
     }
     IP->socket->read(buffer,SIZE);
@@ -83,7 +92,6 @@ bool Log_in::log_communicate(std::string construction)
     if(!IP->sended)
     {
         network_error();
-        IP->socket->close();
         return false;
     }
     memset(buffer,0,SIZE);
@@ -91,12 +99,9 @@ bool Log_in::log_communicate(std::string construction)
     if(!IP->recved)
     {
         network_error();
-        IP->socket->close();
         return false;
     }
     IP->socket->read(buffer,SIZE);
-
-
     memset(buffer,0,SIZE);
     strcpy(buffer,pswd.toStdString().c_str());
 
@@ -105,7 +110,6 @@ bool Log_in::log_communicate(std::string construction)
     if(!IP->sended)
     {
         network_error();
-        IP->socket->close();
         return false;
     }
 
@@ -115,11 +119,11 @@ bool Log_in::log_communicate(std::string construction)
     if(!IP->recved)
     {
         network_error();
-        IP->socket->close();
         return false;
     }
     IP->socket->read(buffer,SIZE);
 
+    cout<<buffer<<endl;
     if(strcmp(buffer,"error1")==0)
     {
         QMessageBox msg;
@@ -129,8 +133,6 @@ bool Log_in::log_communicate(std::string construction)
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-
-        IP->socket->close();
         return false;
     }
     else if(strcmp(buffer,"error2")==0)
@@ -142,8 +144,6 @@ bool Log_in::log_communicate(std::string construction)
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-
-        IP->socket->close();
         return false;
     }
     else if(strcmp(buffer,"error3")==0)
@@ -155,8 +155,6 @@ bool Log_in::log_communicate(std::string construction)
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-
-        IP->socket->close();
         return false;
     }
     else if(strcmp(buffer,"error4")==0)
@@ -168,8 +166,6 @@ bool Log_in::log_communicate(std::string construction)
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-
-        IP->socket->close();
         return false;
     }
     else if(strcmp(buffer,"error5")==0)
@@ -181,8 +177,6 @@ bool Log_in::log_communicate(std::string construction)
         msg.setIcon((QMessageBox::Information));
         msg.addButton(tr("确定"),QMessageBox::ActionRole);
         msg.exec();
-
-        IP->socket->close();
         return false;
     }
     else
@@ -200,7 +194,6 @@ bool Log_in::log_communicate(std::string construction)
             msg.setIcon((QMessageBox::Information));
             msg.addButton(tr("确定"),QMessageBox::ActionRole);
             msg.exec();
-
             return true;
         }
         else
@@ -212,8 +205,6 @@ bool Log_in::log_communicate(std::string construction)
             msg.setIcon((QMessageBox::Information));
             msg.addButton(tr("确定"),QMessageBox::ActionRole);
             msg.exec();
-
-            IP->socket->close();
             return false;
         }
     }
@@ -225,6 +216,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     if(!log_communicate(construction))
     {
         IP->socket->close();
+        IP->socket->reset();
         return;
     }
     memset(buffer,0,SIZE);
@@ -235,6 +227,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     {
         network_error();
         IP->socket->close();
+        IP->socket->reset();
         return;
     }
     Chat_Window *chat_window=new Chat_Window();
@@ -255,6 +248,7 @@ void Log_in::on_sign_in_but_clicked()//注册按钮
     if(!log_communicate(construction))
     {
         IP->socket->close();
+        IP->socket->reset();
         return;
     }
     memset(buffer,0,SIZE);
@@ -265,6 +259,7 @@ void Log_in::on_sign_in_but_clicked()//注册按钮
     {
         network_error();
         IP->socket->close();
+        IP->socket->reset();
         return;
     }
     Chat_Window *chat_window=new Chat_Window();
@@ -272,4 +267,38 @@ void Log_in::on_sign_in_but_clicked()//注册按钮
     chat_window->IP_assign(IP);
     chat_window->show();
     this->close();
+}
+
+void Log_in::on_user_name_returnPressed()
+{
+    QString name=this->ui->user_name->text();
+    QString pswd=this->ui->user_pswd->text();
+    if(name.length()==0)
+    {
+        QMessageBox msg;
+        msg.setWindowTitle("提示");
+        msg.setText("请输入账号！");
+        msg.setStyleSheet("font: 8pt;");
+        msg.setIcon((QMessageBox::Information));
+        msg.addButton(tr("确定"),QMessageBox::ActionRole);
+        msg.exec();
+    }
+    else if(pswd.length()==0)
+    {
+        QMessageBox msg;
+        msg.setWindowTitle("提示");
+        msg.setText("请输入密码！");
+        msg.setStyleSheet("font: 8pt;");
+        msg.setIcon((QMessageBox::Information));
+        msg.addButton(tr("确定"),QMessageBox::ActionRole);
+        msg.exec();
+    }
+    else {
+        on_Log_in_but_clicked();
+    }
+}
+
+void Log_in::on_user_pswd_returnPressed()
+{
+    on_user_name_returnPressed();
 }

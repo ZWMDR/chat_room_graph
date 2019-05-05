@@ -30,6 +30,10 @@ private slots:
 
     void on_sign_in_but_clicked();
 
+    void on_user_name_returnPressed();
+
+    void on_user_pswd_returnPressed();
+
 private:
     Ui::Log_in *ui;
     IP_info *IP;
