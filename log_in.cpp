@@ -23,6 +23,14 @@ Log_in::Log_in(QWidget *parent) :
     ui->setupUi(this);
     lst_input_count=0;
     buffer=new char[SIZE];
+    if(user_config_exist)
+    {
+        user_name=user_config->readLine();
+        user_pswd=user_config->readLine();
+
+        this->ui->user_name->setText(user_name);
+        this->ui->user_pswd->setText(user_pswd);
+    }
 }
 
 void Log_in::IP_assign(IP_info *IP)
@@ -33,6 +41,12 @@ void Log_in::IP_assign(IP_info *IP)
 Log_in::~Log_in()
 {
     delete ui;
+}
+
+void Log_in::config_file(QFile *user_config)
+{
+    this->user_config=user_config;
+    user_config_exist=this->user_config->open(QIODevice::ReadOnly | QIODevice::Text);
 }
 
 bool Log_in::log_communicate(std::string construction)

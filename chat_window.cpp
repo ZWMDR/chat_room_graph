@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QtDebug>
 #include <regex>
+#include <string>
 
 Chat_Window::Chat_Window(QWidget *parent) :
     QMainWindow(parent),
@@ -24,20 +25,21 @@ void Chat_Window::socket_recv()
 {
     clear_buf(buffer);
     IP->socket->read(buffer,SIZE);
-    this->ui->output->appendPlainText(buffer);
-    /*
-    std::string st=buffer;
-    if(strncmp(buffer,"SYS_SIGNAL_ONLINE_COUNT:",24)==0)
+    //this->ui->output->appendPlainText(buffer);
+    if(strncmp(buffer,"SYS_SIGNAL_ONLINE_COUNT:",23)==0)
     {
-        st="聊天室当前在线人数:"+st.substr(24)+"人";
-        this->ui->mesg_output->appendPlainText(buffer);
-        IP->socket->write(buffer,SIZE);
+        std::string st=buffer;
+        st=st.substr(24);
+        std::string num=st.substr(0,3);
+        std::string msg=st.substr(4);
+        num="在线人数:"+num+"人";
+        this->ui->mesg_output->appendPlainText(num.c_str());
+        this->ui->output->appendPlainText(msg.c_str());
     }
     else
     {
         this->ui->output->appendPlainText(buffer);
     }
-    */
 }
 
 void Chat_Window::IP_assign(IP_info *IP)
