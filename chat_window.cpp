@@ -13,6 +13,8 @@ Chat_Window::Chat_Window(QWidget *parent) :
     ui->setupUi(this);
     buff=new char[SIZE];
     buffer=new char[SIZE];
+    this->ui->output->setTextColor("red");
+    this->ui->output->setFontPointSize(11);
 }
 
 Chat_Window::~Chat_Window()
@@ -30,15 +32,17 @@ void Chat_Window::socket_recv()
     {
         std::string st=buffer;
         st=st.substr(24);
-        std::string num=st.substr(0,3);
-        std::string msg=st.substr(4);
+        QString num=st.substr(0,3).c_str();
+        QString msg=st.substr(4).c_str();
         num="在线人数:"+num+"人";
-        this->ui->mesg_output->appendPlainText(num.c_str());
-        this->ui->output->appendPlainText(msg.c_str());
+        this->ui->mesg_output->appendPlainText(num);
+        msg+="\n\n";
+        this->ui->output->append(msg);
     }
     else
     {
-        this->ui->output->appendPlainText(buffer);
+        strcat(buffer,"\n");
+        this->ui->output->append(buffer);
     }
 }
 
@@ -58,16 +62,6 @@ void Chat_Window::IP_assign(IP_info *IP)
 void Chat_Window::clear_buf(char *buf)
 {
     memset(buf,0,SIZE);
-}
-
-void Chat_Window::recv_hello()
-{
-    IP->recved=IP->socket->waitForReadyRead(2000);
-    if(IP->recved)
-    {
-        this->ui->output->appendPlainText(buffer);
-        std::cout<<buffer<<std::endl;
-    }
 }
 
 void Chat_Window::on_send_bwt_clicked()

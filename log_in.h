@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <string.h>
 #include "ip_info.h"
-#include <QFile>
+#include <fstream>
 
 namespace Ui {
 class Log_in;
@@ -22,7 +22,6 @@ class Log_in : public QMainWindow
 public:
     explicit Log_in(QWidget *parent = nullptr);
     void IP_assign(IP_info *IP);
-    void config_file(QFile *user_config);
     ~Log_in();
 
 private slots:
@@ -41,12 +40,14 @@ private:
     IP_info *IP;
     int lst_input_count;
     char *buffer;
-    QFile *user_config;
     bool user_config_exist;
     QString user_name;
     QString user_pswd;
+    bool _config_;
 
     bool log_communicate(std::string);
+    bool file_open();
+    bool file_write(QString name,QString pswd);
 };
 
 #endif // LOG_IN_H

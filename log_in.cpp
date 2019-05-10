@@ -23,16 +23,7 @@ Log_in::Log_in(QWidget *parent) :
     ui->setupUi(this);
     lst_input_count=0;
     buffer=new char[SIZE];
-    /*
-    if(user_config_exist)
-    {
-        user_name=user_config->readLine();
-        user_pswd=user_config->readLine();
-
-        this->ui->user_name->setText(user_name);
-        this->ui->user_pswd->setText(user_pswd);
-    }
-    */
+    this->_config_=file_open();
 }
 
 void Log_in::IP_assign(IP_info *IP)
@@ -45,10 +36,36 @@ Log_in::~Log_in()
     delete ui;
 }
 
-void Log_in::config_file(QFile *user_config)
+bool Log_in::file_open()
 {
-    this->user_config=user_config;
-    user_config_exist=this->user_config->open(QIODevice::ReadOnly | QIODevice::Text);
+    std::ifstream config_file;
+    try
+    {
+        config_file.open("config.ini",ios::in);
+    }
+    catch(std::exception &e)
+    {
+        std::cout<<e.what()<<std::endl;
+        config_file.close();
+        return false;
+    }
+    std::string name,pswd;
+    config_file>>name;
+    config_file>>pswd;
+    this->ui->user_name->setText(name.c_str());
+    this->ui->user_pswd->setText(pswd.c_str());
+    config_file.close();
+    return true;
+}
+
+bool Log_in::file_write(QString name, QString pswd)
+{
+    std::ofstream config_file;
+    config_file.open("config.ini",ios::out);
+    config_file<<name.toStdString()<<std::endl;
+    config_file<<pswd.toStdString()<<std::endl;
+    config_file.close();
+    return true;
 }
 
 bool Log_in::log_communicate(std::string construction)
@@ -246,6 +263,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
         IP->socket->reset();
         return;
     }
+    file_write(this->user_name,this->user_pswd);
     Chat_Window *chat_window=new Chat_Window();
     chat_window->setWindowTitle(" 电子垃圾聊天室");
     chat_window->IP_assign(IP);

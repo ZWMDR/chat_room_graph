@@ -19,7 +19,6 @@ public:
     explicit Chat_Window(QWidget *parent = nullptr);
     ~Chat_Window();
     void IP_assign(IP_info *IP);
-    void recv_hello();
 
 private slots:
     void on_send_bwt_clicked();
