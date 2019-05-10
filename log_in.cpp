@@ -23,6 +23,7 @@ Log_in::Log_in(QWidget *parent) :
     ui->setupUi(this);
     lst_input_count=0;
     buffer=new char[SIZE];
+    /*
     if(user_config_exist)
     {
         user_name=user_config->readLine();
@@ -31,6 +32,7 @@ Log_in::Log_in(QWidget *parent) :
         this->ui->user_name->setText(user_name);
         this->ui->user_pswd->setText(user_pswd);
     }
+    */
 }
 
 void Log_in::IP_assign(IP_info *IP)
