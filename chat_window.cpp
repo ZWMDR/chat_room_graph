@@ -4,7 +4,13 @@
 #include <QThread>
 #include <QtDebug>
 #include <regex>
+#include <QString>
 #include <string>
+#include <QFileDialog>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <QDateTime>
 
 Chat_Window::Chat_Window(QWidget *parent) :
     QMainWindow(parent),
@@ -15,6 +21,14 @@ Chat_Window::Chat_Window(QWidget *parent) :
     buffer=new char[SIZE];
     this->ui->output->setTextColor("red");
     this->ui->output->setFontPointSize(11);
+
+    QDir dir;
+    if(!dir.exists(recv_imgs))
+        dir.mkdir(recv_imgs);
+    if(!dir.exists(recv_files))
+        dir.mkdir(recv_files);
+    if(!dir.exists(send_imgs))
+        dir.mkdir(send_imgs);
 }
 
 Chat_Window::~Chat_Window()
@@ -35,9 +49,29 @@ void Chat_Window::socket_recv()
         QString num=st.substr(0,3).c_str();
         QString msg=st.substr(4).c_str();
         num="在线人数:"+num+"人";
-        this->ui->mesg_output->appendPlainText(num);
+        this->ui->mesg_output->setPlainText(num);
         msg+="\n\n";
         this->ui->output->append(msg);
+    }
+    else if(strncmp(buffer,"SYS_SIGNAL_IMG:",14)==0)
+    {
+        QString cmd=buffer;
+        QStringList cmd_split=cmd.split(":");
+        qint64 counts=cmd_split[2].toInt();
+        std::cout<<"counts="<<counts<<std::endl;
+        QString img_name=recv_imgs+cmd_split[1];
+        QFile img(img_name);
+        img.open(QIODevice::WriteOnly);
+        QObject::disconnect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
+        while(counts--)
+        {
+            clear_buf(buffer);
+            IP->recved=IP->socket->waitForReadyRead(2000);
+            this->IP->socket->read(buffer,SIZE);
+            img.write(buffer,SIZE);
+        }
+        img.close();
+        QObject::connect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
     }
     else
     {
@@ -83,4 +117,103 @@ void Chat_Window::on_cancel_bwt_clicked()
     IP->socket->close();
     IP->socket->reset();
     this->close();
+}
+
+void Chat_Window::on_file_btn_clicked()//文件
+{
+    QFileDialog *fileDialog=new QFileDialog(this);
+    fileDialog->setWindowTitle(tr("选择要发送的文件"));
+    fileDialog->setDirectory(".");
+    fileDialog->setFileMode(QFileDialog::ExistingFiles);
+    fileDialog->setViewMode(QFileDialog::Detail);
+    QStringList fileNames;
+    if(fileDialog->exec())
+    {
+        fileNames = fileDialog->selectedFiles();
+    }
+    for(auto tmp:fileNames)//获取文件完整路径
+    {
+        qDebug()<<tmp<<endl;
+    }
+}
+
+void Chat_Window::on_img_btn_clicked()
+{
+    QFileDialog *fileDialog=new QFileDialog(this);
+    fileDialog->setWindowTitle(tr("选择要发送的图片"));
+    fileDialog->setDirectory(".");
+    fileDialog->setNameFilter(tr("Images(*.png *.jpg *.jpeg *.bmp)"));
+    fileDialog->setFileMode(QFileDialog::ExistingFiles);
+    fileDialog->setViewMode(QFileDialog::Detail);
+    QStringList fileNames;
+    if(fileDialog->exec())
+    {
+        fileNames = fileDialog->selectedFiles();
+    }
+    for(auto tmp:fileNames)//获取文件完整路径
+    {
+        qDebug()<<tmp<<endl;
+        //获取文件信息
+        QFileInfo info(tmp);
+        qint64 img_size=info.size();//字节
+        std::cout<<"img_size="<<(QString::number((double)img_size/1024,10,2)+"KB,").toStdString()<<std::endl;
+        if(img_size/1024/1024>9)//最大不超过9MB
+        {
+            QMessageBox msg;
+            msg.setWindowTitle("提示");
+            QString mesg="所选图片大小为:"+QString::number((double)img_size/1024,10,2)+"KB,"+"图片太大无法发送!";
+            msg.setText(mesg);
+            msg.setStyleSheet("font: 8pt;");
+            msg.setIcon((QMessageBox::Information));
+            msg.addButton(tr("确定"),QMessageBox::ActionRole);
+            msg.exec();
+            continue;
+        }
+        qint64 counts=img_size/1024+1;
+        //打开文件
+        QFile file(tmp);
+        if(!file.open(QIODevice::ReadOnly))
+        {
+            QMessageBox msg;
+            msg.setWindowTitle("提示");
+            msg.setText("图片打开错误，请稍后重试！");
+            msg.setStyleSheet("font: 8pt;");
+            msg.setIcon((QMessageBox::Information));
+            msg.addButton(tr("确定"),QMessageBox::ActionRole);
+            msg.exec();
+            continue;
+        }
+        QDataStream read_in(&file);
+
+        //提取文件名
+        QDateTime Time = QDateTime::currentDateTime();//获取系统现在的时间
+        QString time = Time.toString("yyyy_MM_dd_hh_mm_ss_ddd");
+        QStringList img_name = tmp.split("/");
+        QString im_name=img_name.last();
+        QString im_dump=send_imgs+time+im_name;
+        QFile img_dump(im_dump);
+        img_dump.open(QIODevice::WriteOnly);
+        std::cout<<im_name.toStdString()<<std::endl;
+        //发送图片
+        clear_buf(buffer);
+        strcpy(buffer,"SYS_SIGNAL_IMG:");//系统图片发送信号
+        strcat(buffer,(im_name+":").toStdString().c_str());//图片名
+        strcat(buffer,QString::number(counts,10).toStdString().c_str());//发送socket次数
+        IP->socket->write(buffer,SIZE);
+        IP->socket->waitForBytesWritten(2000);
+        QObject::disconnect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
+        while(counts--)
+        {
+            clear_buf(buffer);
+            file.read(buffer,SIZE);
+            this->IP->socket->write(buffer,SIZE);
+            this->IP->sended=this->IP->socket->waitForBytesWritten(1000);
+            this->IP->recved=this->IP->socket->waitForReadyRead(1000);
+            this->IP->socket->read(buff,SIZE);
+            img_dump.write(buffer,SIZE);
+        }
+        file.close();
+        img_dump.close();
+        QObject::connect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
+    }
 }

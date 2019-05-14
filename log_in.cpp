@@ -83,7 +83,8 @@ bool Log_in::log_communicate(std::string construction)
         msg.exec();
         return false;
     }
-
+    this->user_name=name;
+    this->user_pswd=pswd;
     //打开TCP连接
     IP->socket->connectToHost(IP->IP_addr.c_str(), IP->IP_port);
     IP->connected=IP->socket->waitForConnected(2000);

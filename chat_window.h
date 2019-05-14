@@ -2,6 +2,7 @@
 #define CHAT_WINDOW_H
 
 #include <QMainWindow>
+#include <QFile>
 #include "ip_info.h"
 #include "log_in.h"
 
@@ -25,11 +26,18 @@ private slots:
 
     void on_cancel_bwt_clicked();
 
+    void on_file_btn_clicked();
+
+    void on_img_btn_clicked();
+
 private:
     Ui::Chat_Window *ui;
     IP_info *IP;
     char *buffer;
     char *buff;
+    QString recv_imgs="recv_imgs\\";
+    QString recv_files="recv_files\\";
+    QString send_imgs="send_imgs\\";
 
     void socket_recv();
     void clear_buf(char *buf);
