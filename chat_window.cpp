@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <QDateTime>
+#include <QTextDocumentFragment>
 
 Chat_Window::Chat_Window(QWidget *parent) :
     QMainWindow(parent),
@@ -41,7 +42,6 @@ void Chat_Window::socket_recv()
 {
     clear_buf(buffer);
     IP->socket->read(buffer,SIZE);
-    //this->ui->output->appendPlainText(buffer);
     if(strncmp(buffer,"SYS_SIGNAL_ONLINE_COUNT:",23)==0)
     {
         std::string st=buffer;
@@ -57,20 +57,35 @@ void Chat_Window::socket_recv()
     {
         QString cmd=buffer;
         QStringList cmd_split=cmd.split(":");
-        qint64 counts=cmd_split[2].toInt();
+        qint64 counts=cmd_split[2].toLong();
         std::cout<<"counts="<<counts<<std::endl;
-        QString img_name=recv_imgs+cmd_split[1];
+        QString img_name=cmd_split[1];
         QFile img(img_name);
         img.open(QIODevice::WriteOnly);
+        std::cout<<"img opened"<<std::endl;
         QObject::disconnect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
-        while(counts--)
+        while(counts>0)
         {
             clear_buf(buffer);
-            IP->recved=IP->socket->waitForReadyRead(2000);
-            this->IP->socket->read(buffer,SIZE);
-            img.write(buffer,SIZE);
+            IP->recved=IP->socket->waitForReadyRead(30);
+            qint64 recv_len=this->IP->socket->read(buffer,SIZE);
+            img.write(buffer,recv_len);
+            counts-=recv_len;
+            //std::cout<<"recv:"<<recv_len<<", remaind Bytes:"<<counts<<std::endl;
         }
         img.close();
+        QString msg;
+        for(int i=3;i<cmd_split.length()-1;i++)
+        {
+            msg+=cmd_split[i];
+            msg+=":";
+        }
+        this->ui->output->append(msg+"\n");
+        QTextDocumentFragment fragment;
+        fragment = QTextDocumentFragment::fromHtml("<img src='"+img_name+"'>");
+        this->ui->output->textCursor().insertFragment(fragment);
+        this->ui->output->setVisible(true);
+        this->IP->socket->readAll();
         QObject::connect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
     }
     else
@@ -157,7 +172,7 @@ void Chat_Window::on_img_btn_clicked()
         QFileInfo info(tmp);
         qint64 img_size=info.size();//字节
         std::cout<<"img_size="<<(QString::number((double)img_size/1024,10,2)+"KB,").toStdString()<<std::endl;
-        if(img_size/1024/1024>9)//最大不超过9MB
+        if(img_size/1024/1024>5)//最大不超过5MB
         {
             QMessageBox msg;
             msg.setWindowTitle("提示");
@@ -184,7 +199,6 @@ void Chat_Window::on_img_btn_clicked()
             continue;
         }
         QDataStream read_in(&file);
-
         //提取文件名
         QDateTime Time = QDateTime::currentDateTime();//获取系统现在的时间
         QString time = Time.toString("yyyy_MM_dd_hh_mm_ss_ddd");
@@ -198,22 +212,23 @@ void Chat_Window::on_img_btn_clicked()
         clear_buf(buffer);
         strcpy(buffer,"SYS_SIGNAL_IMG:");//系统图片发送信号
         strcat(buffer,(im_name+":").toStdString().c_str());//图片名
-        strcat(buffer,QString::number(counts,10).toStdString().c_str());//发送socket次数
+        strcat(buffer,QString::number(img_size,10).toStdString().c_str());//发送字节数
+        counts=img_size;
         IP->socket->write(buffer,SIZE);
         IP->socket->waitForBytesWritten(2000);
-        QObject::disconnect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
-        while(counts--)
+        std::cout<<"send buffer:"<<buffer<<std::endl;
+        while(counts>0)
         {
             clear_buf(buffer);
             file.read(buffer,SIZE);
-            this->IP->socket->write(buffer,SIZE);
+            qint64 send_len=this->IP->socket->write(buffer,SIZE);
             this->IP->sended=this->IP->socket->waitForBytesWritten(1000);
-            this->IP->recved=this->IP->socket->waitForReadyRead(1000);
-            this->IP->socket->read(buff,SIZE);
+            //this->IP->recved=this->IP->socket->waitForReadyRead(1000);
+            //this->IP->socket->read(buff,SIZE);
             img_dump.write(buffer,SIZE);
+            counts-=send_len;
         }
         file.close();
         img_dump.close();
-        QObject::connect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
     }
 }
