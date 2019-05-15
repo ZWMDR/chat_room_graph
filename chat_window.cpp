@@ -12,6 +12,7 @@
 #include <sstream>
 #include <QDateTime>
 #include <QTextDocumentFragment>
+#include <QImage>
 
 Chat_Window::Chat_Window(QWidget *parent) :
     QMainWindow(parent),
@@ -67,7 +68,7 @@ void Chat_Window::socket_recv()
         while(counts>0)
         {
             clear_buf(buffer);
-            IP->recved=IP->socket->waitForReadyRead(30);
+            IP->recved=IP->socket->waitForReadyRead(1);
             qint64 recv_len=this->IP->socket->read(buffer,SIZE);
             img.write(buffer,recv_len);
             counts-=recv_len;
@@ -81,8 +82,20 @@ void Chat_Window::socket_recv()
             msg+=":";
         }
         this->ui->output->append(msg+"\n");
+
+        QImage image;
+        image.load(img_name);
+        int w=image.width();
+        int h=image.height();
+        //std::cout<<"w="<<w<<" h="<<h<<std::endl;
         QTextDocumentFragment fragment;
-        fragment = QTextDocumentFragment::fromHtml("<img src='"+img_name+"'>");
+        if(w>640)
+        {
+            double scale_rate=640.0/w;
+            w=640;
+            h*=scale_rate;
+        }
+        fragment = QTextDocumentFragment::fromHtml("<img src='"+img_name+"'width="+QString::number(w)+" height="+QString::number(h)+" />");
         this->ui->output->textCursor().insertFragment(fragment);
         this->ui->output->setVisible(true);
         this->IP->socket->readAll();
@@ -216,7 +229,7 @@ void Chat_Window::on_img_btn_clicked()
         counts=img_size;
         IP->socket->write(buffer,SIZE);
         IP->socket->waitForBytesWritten(2000);
-        std::cout<<"send buffer:"<<buffer<<std::endl;
+        //std::cout<<"send buffer:"<<buffer<<std::endl;
         while(counts>0)
         {
             clear_buf(buffer);
