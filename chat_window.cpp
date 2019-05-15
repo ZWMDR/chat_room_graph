@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <QTextDocumentFragment>
 #include <QImage>
+#include <QThread>
 
 Chat_Window::Chat_Window(QWidget *parent) :
     QMainWindow(parent),
@@ -69,6 +70,7 @@ void Chat_Window::socket_recv()
         {
             clear_buf(buffer);
             IP->recved=IP->socket->waitForReadyRead(1);
+            //QThread::usleep(500);
             qint64 recv_len=this->IP->socket->read(buffer,SIZE);
             img.write(buffer,recv_len);
             counts-=recv_len;
