@@ -125,7 +125,7 @@ void Chat_Window::socket_recv()
         for(int i=3;i<cmd_split.length();i++)
         {
             msg+=cmd_split[i];
-            if(i<cmd_split.length())
+            if(i<cmd_split.length()-1)
                 msg+=":";
         }
         this->ui->output->append(msg+"\n");
@@ -197,7 +197,7 @@ void Chat_Window::on_file_btn_clicked()//文件
         //获取文件信息
         QFileInfo info(tmp);
         qint64 file_size=info.size();//字节
-        std::cout<<"img_size="<<(QString::number((double)file_size/1024,10,2)+"KB,").toStdString()<<std::endl;
+        std::cout<<"img_size="<<(QString::number(file_size/1024.0,10,2)+"KB,").toStdString()<<std::endl;
         if(file_size/1024/1024>20)//最大不超过20MB
         {
             QMessageBox msg;
@@ -275,12 +275,12 @@ void Chat_Window::on_img_btn_clicked()
         //获取文件信息
         QFileInfo info(tmp);
         qint64 img_size=info.size();//字节
-        std::cout<<"img_size="<<(QString::number((double)img_size/1024,10,2)+"KB,").toStdString()<<std::endl;
+        std::cout<<"img_size="<<(QString::number(img_size/1024.0,10,2)+"KB,").toStdString()<<std::endl;
         if(img_size/1024/1024>5)//最大不超过5MB
         {
             QMessageBox msg;
             msg.setWindowTitle("提示");
-            QString mesg="所选图片大小为:"+QString::number((double)img_size/1024,10,2)+"KB,"+"图片太大无法发送!";
+            QString mesg="所选图片大小为:"+QString::number(img_size/1024.0,10,2)+"KB,"+"图片太大无法发送!";
             msg.setText(mesg);
             msg.setStyleSheet("font: 8pt;");
             msg.setIcon((QMessageBox::Information));
