@@ -266,7 +266,7 @@ void Log_in::on_Log_in_but_clicked()//登录按钮
     }
     file_write(this->user_name,this->user_pswd);
     Chat_Window *chat_window=new Chat_Window();
-    chat_window->setWindowTitle(" 电子垃圾聊天室");
+    chat_window->setWindowTitle(" 电子垃圾聊天室-"+user_name);
     chat_window->IP_assign(IP);
     chat_window->show();
     this->close();
@@ -298,7 +298,7 @@ void Log_in::on_sign_in_but_clicked()//注册按钮
         return;
     }
     Chat_Window *chat_window=new Chat_Window();
-    chat_window->setWindowTitle(" 电子垃圾聊天室");
+    chat_window->setWindowTitle(" 电子垃圾聊天室-"+user_name);
     chat_window->IP_assign(IP);
     chat_window->show();
     this->close();

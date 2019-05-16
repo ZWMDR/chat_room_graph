@@ -28,16 +28,19 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         log_in.cpp \
-    chat_window.cpp
+    chat_window.cpp \
+    emoji.cpp
 
 HEADERS += \
         log_in.h \
     chat_window.h \
-    ip_info.h
+    ip_info.h \
+    emoji.h
 
 FORMS += \
         log_in.ui \
-    chat_window.ui
+    chat_window.ui \
+    emoji.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -5,6 +5,7 @@
 #include <QFile>
 #include "ip_info.h"
 #include "log_in.h"
+#include "emoji.h"
 
 #define SIZE 1024
 
@@ -30,11 +31,14 @@ private slots:
 
     void on_img_btn_clicked();
 
+    void on_emoji_btn_clicked();
+
 private:
     Ui::Chat_Window *ui;
     IP_info *IP;
     char *buffer;
     char *buff;
+    bool emoji_flag;
     QString recv_imgs="recv_imgs\\";
     QString recv_files="recv_files\\";
     QString send_imgs="send_imgs\\";

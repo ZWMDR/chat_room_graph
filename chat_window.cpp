@@ -14,6 +14,7 @@
 #include <QTextDocumentFragment>
 #include <QImage>
 #include <QThread>
+#include <QMouseEvent>
 
 Chat_Window::Chat_Window(QWidget *parent) :
     QMainWindow(parent),
@@ -22,8 +23,9 @@ Chat_Window::Chat_Window(QWidget *parent) :
     ui->setupUi(this);
     buff=new char[SIZE];
     buffer=new char[SIZE];
-    this->ui->output->setTextColor("red");
-    this->ui->output->setFontPointSize(11);
+    emoji_flag=false;
+    //this->ui->output->setTextColor("red");
+    //this->ui->output->setFontPointSize(11);
 
     QDir dir;
     if(!dir.exists(recv_imgs))
@@ -127,13 +129,31 @@ void Chat_Window::socket_recv()
         for(int i=3;i<cmd_split.length();i++)
         {
             msg+=cmd_split[i];
-            if(i<cmd_split.length())
+            if(i<cmd_split.length()-1)
                 msg+=":";
         }
         this->ui->output->append(msg+"\n");
 
         this->IP->socket->readAll();
         QObject::connect(IP->socket,&QTcpSocket::readyRead,this,&Chat_Window::socket_recv);
+    }
+    else if(strncmp(buffer,"SYS_SIGNAL_EMOTION:",18)==0)
+    {
+        QString cmd=buffer;
+        QStringList cmd_split=cmd.split(":");
+        QString emoji=cmd_split[1];
+        QString msg;
+        for(int i=2;i<cmd_split.length()-1;i++)
+        {
+            msg+=cmd_split[i];
+            msg+=":";
+        }
+        QString path="emotions\\"+emoji;
+        QTextDocumentFragment fragment;
+        this->ui->output->append(msg+"\n");
+        fragment = QTextDocumentFragment::fromHtml("<img src='"+path+"'/>");
+        this->ui->output->textCursor().insertFragment(fragment);
+        this->ui->output->setVisible(true);
     }
     else
     {
@@ -199,7 +219,7 @@ void Chat_Window::on_file_btn_clicked()//文件
         //获取文件信息
         QFileInfo info(tmp);
         qint64 file_size=info.size();//字节
-        std::cout<<"img_size="<<(QString::number((double)file_size/1024,10,2)+"KB,").toStdString()<<std::endl;
+        std::cout<<"img_size="<<(QString::number(file_size/1024.0,10,2)+"KB,").toStdString()<<std::endl;
         if(file_size/1024/1024>20)//最大不超过20MB
         {
             QMessageBox msg;
@@ -277,12 +297,12 @@ void Chat_Window::on_img_btn_clicked()
         //获取文件信息
         QFileInfo info(tmp);
         qint64 img_size=info.size();//字节
-        std::cout<<"img_size="<<(QString::number((double)img_size/1024,10,2)+"KB,").toStdString()<<std::endl;
+        std::cout<<"img_size="<<(QString::number(img_size/1024.0,10,2)+"KB,").toStdString()<<std::endl;
         if(img_size/1024/1024>5)//最大不超过5MB
         {
             QMessageBox msg;
             msg.setWindowTitle("提示");
-            QString mesg="所选图片大小为:"+QString::number((double)img_size/1024,10,2)+"KB,"+"图片太大无法发送!";
+            QString mesg="所选图片大小为:"+QString::number(img_size/1024.0,10,2)+"KB,"+"图片太大无法发送!";
             msg.setText(mesg);
             msg.setStyleSheet("font: 8pt;");
             msg.setIcon((QMessageBox::Information));
@@ -335,3 +355,15 @@ void Chat_Window::on_img_btn_clicked()
         //img_dump.close();
     }
 }
+
+void Chat_Window::on_emoji_btn_clicked()
+{
+    Emoji *emoji=new Emoji();
+    emoji->IP_assign(this->IP);
+    this->ui->emoji_btn->mapToGlobal(this->ui->emoji_btn->pos());
+    int x=this->ui->emoji_btn->mapToGlobal(this->ui->emoji_btn->pos()).x();
+    int y=this->ui->emoji_btn->mapToGlobal(this->ui->emoji_btn->pos()).y();
+    emoji->setGeometry(x-130,y-280,260,280);
+    emoji->show();
+}
+
